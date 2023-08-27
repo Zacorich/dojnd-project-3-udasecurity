@@ -44,21 +44,21 @@ class SecurityServiceTest {
     @ParameterizedTest
     @EnumSource(value = ArmingStatus.class, names = {"ARMED_HOME", "ARMED_AWAY"})
     void testPendingAlarmWhenSensorActivatedWhileArmed(ArmingStatus armingStatus) {
-        //create sensor
+        // create sensor
         Sensor sensor = new Sensor();
         sensor.setActive(false);
 
-        //make sure repository returns some data for this test case
-        //and set initial state of the securityService too
+        // make sure repository returns some data for this test case
+        // and set initial state of the securityService too
         when(securityRepository.getArmingStatus()).thenReturn(armingStatus);
         securityService.setArmingStatus(armingStatus);
         when(securityRepository.getAlarmStatus()).thenReturn(AlarmStatus.NO_ALARM);
         securityService.setAlarmStatus(AlarmStatus.NO_ALARM);
 
-        //activate sensor
+        // activate sensor
         securityService.changeSensorActivationStatus(sensor, true);
 
-        //if mocked securityRepository is used directly from securityService without
+        // if mocked securityRepository is used directly from securityService without
         //in-memory storage it is impossible to test business logic as securityService's state
         //is represented by securityRepository
         //when(securityRepository.getAlarmStatus()).thenReturn(AlarmStatus.PENDING_ALARM);
@@ -80,7 +80,7 @@ class SecurityServiceTest {
         securityService.setAlarmStatus(AlarmStatus.PENDING_ALARM);
 
         Sensor activeSensor = new Sensor();
-        //initial sensor state is inactive
+        // initial sensor state is inactive
         activeSensor.setActive(false);
 
         // activate sensor
@@ -114,7 +114,7 @@ class SecurityServiceTest {
         securityService.changeSensorActivationStatus(sensor1, false);
         securityService.changeSensorActivationStatus(sensor2, false);
 
-        // Assert the Alarm status changed to AlarmStatus.NO_ALARM
+        // check the alarm status changed to AlarmStatus.NO_ALARM
         assertEquals(AlarmStatus.NO_ALARM, securityService.getAlarmStatus());
     }
 
@@ -123,17 +123,18 @@ class SecurityServiceTest {
      */
     @Test
     void ifAlarmIsActive_changeInSensorStateShouldNotAffectAlarmState() {
-        // Create motion sensor that is active
+        // create a motion sensor that is active
         Sensor sensor = new Sensor("Living Room", SensorType.MOTION);
         sensor.setActive(true);
-        // Assuming the system is armed at home
+
+        // init system alarm and arming to be ALARM and ARMED_HOME
         securityService.setAlarmStatus(AlarmStatus.ALARM);
         securityService.setArmingStatus(ArmingStatus.ARMED_HOME);
 
-        // Deactivate sensor
+        // deactivate sensor
         securityService.changeSensorActivationStatus(sensor, false);
 
-        // Assert that the alarm status hasn't changed
+        // check that the alarm status didn't change
         assertEquals(AlarmStatus.ALARM, securityService.getAlarmStatus());
     }
 
@@ -146,18 +147,37 @@ class SecurityServiceTest {
         Sensor sensor = new Sensor("Living Room", SensorType.MOTION);
         sensor.setActive(true);
 
-        // Set the initial states
+        // set the initial states
         securityService.setAlarmStatus(AlarmStatus.PENDING_ALARM);
         securityService.setArmingStatus(ArmingStatus.ARMED_HOME);
 
-        // Setup mock repository responses
+        // setup mock repository responses
         when(securityRepository.getAlarmStatus()).thenReturn(AlarmStatus.PENDING_ALARM);
 
-        // Activate the sensor while it's already active
+        // activate the sensor while it's already active
         securityService.changeSensorActivationStatus(sensor, true);
 
-        // Assert the Alarm status changed to AlarmStatus.ALARM
+        // check the alarm status changed to AlarmStatus.ALARM
         assertEquals(AlarmStatus.ALARM, securityService.getAlarmStatus());
     }
 
+    /**
+     * 6. If a sensor is deactivated while already inactive, make no changes to the alarm state.
+     */
+    @Test
+    void ifSensorDeactivatedWhileAlreadyInactive_noChangesToAlarmState() {
+        // create sensor
+        Sensor sensor = new Sensor("Front Door", SensorType.DOOR);
+        sensor.setActive(false);
+
+        // init system with some state
+        AlarmStatus initialAlarmStatus = AlarmStatus.PENDING_ALARM;
+        securityService.setAlarmStatus(initialAlarmStatus);
+
+        // deactivate sensor
+        securityService.changeSensorActivationStatus(sensor, false);
+
+        // Assert that the alarm status hasn't changed
+        assertEquals(initialAlarmStatus, securityService.getAlarmStatus());
+    }
 }
