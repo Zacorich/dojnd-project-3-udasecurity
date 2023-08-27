@@ -200,4 +200,34 @@ class SecurityServiceTest {
         // check that the system changed into alarm status
         assertEquals(AlarmStatus.ALARM, securityService.getAlarmStatus());
     }
+
+    /**
+     * 8. If the image service identifies an image that does not contain a cat, change the status
+     * to no alarm as long as the sensors are not active.
+     */
+    @Test
+    void ifImageServiceDoesNotIdentifyCat_andSensorsAreInactive_setNoAlarm() {
+        // provide fake image to imageService and mock that no cat was found
+        BufferedImage fakeImage = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB); // create a fake image
+        when(imageService.imageContainsCat(fakeImage, 50.0f)).thenReturn(false);
+
+        // create inactive sensors
+        Sensor windowSensor = new Sensor("Window", SensorType.WINDOW);
+        Sensor doorSensor = new Sensor("Door", SensorType.DOOR);
+        windowSensor.setActive(false);
+        doorSensor.setActive(false);
+        Set<Sensor> inactiveSensors = new HashSet<>(Set.of(doorSensor, windowSensor));
+
+        // mock the sensors call
+        when(securityRepository.getSensors()).thenReturn(inactiveSensors);
+
+        //trigger getSensors()
+        securityRepository.getSensors();
+
+        // process the image
+        securityService.processImage(fakeImage);
+
+        // check if system changed to no alarm status
+        assertEquals(AlarmStatus.NO_ALARM, securityService.getAlarmStatus());
+    }
 }
