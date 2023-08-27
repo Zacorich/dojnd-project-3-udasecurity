@@ -180,4 +180,24 @@ class SecurityServiceTest {
         // Assert that the alarm status hasn't changed
         assertEquals(initialAlarmStatus, securityService.getAlarmStatus());
     }
+
+    /**
+     * 7. If the image service identifies an image containing a cat while
+     * the system is armed-home, put the system into alarm status.
+     */
+    @Test
+    void ifImageServiceIdentifiesCat_whenSystemIsArmedHome_goToAlarmStatus() {
+        // fake the imageService that a cat is found in the image
+        BufferedImage fakeImage = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
+        when(imageService.imageContainsCat(fakeImage, 50.0f)).thenReturn(true);
+
+        // set the system to ARMED_HOME
+        securityService.setArmingStatus(ArmingStatus.ARMED_HOME);
+
+        // process the image using the securityService
+        securityService.processImage(fakeImage);
+
+        // check that the system changed into alarm status
+        assertEquals(AlarmStatus.ALARM, securityService.getAlarmStatus());
+    }
 }
