@@ -270,13 +270,14 @@ class SecurityServiceTest {
     /**
      * 11. If the system is armed-home while the camera shows a cat, set the alarm status to alarm.
      */
-    @Test
-    void ifSystemIsArmedHomeAndCameraShowsCat_setAlarmStatusToAlarm() {
+    @ParameterizedTest
+    @EnumSource(value = ArmingStatus.class, names = {"ARMED_HOME", "ARMED_AWAY"})
+    void ifSystemIsArmedHomeAndCameraShowsCat_setAlarmStatusToAlarm(ArmingStatus armingStatus) {
         // mock the image service that the image cointains the cat
         when(imageService.imageContainsCat(any(), anyFloat())).thenReturn(true);
 
         // set system arming status as required and alarm satus to NO_ALARM
-        securityService.setArmingStatus(ArmingStatus.ARMED_HOME);
+        securityService.setArmingStatus(armingStatus);
         securityService.setAlarmStatus(AlarmStatus.NO_ALARM);
 
         // trigger image processing and mockito stub
@@ -431,7 +432,37 @@ class SecurityServiceTest {
         assertEquals(AlarmStatus.ALARM, securityService.getAlarmStatus());
     }
 
+    /**
+     * Test 1: for better coverage
+     */
+    @Test
+    void betterCoverage1() {
+        Sensor sensor1 = new Sensor("Living Room", SensorType.MOTION);
+        sensor1.setActive(false);
+        Sensor sensor2 = new Sensor("Living Room", SensorType.MOTION);
+        sensor2.setActive(false);
 
+        Set<Sensor> sensors = new HashSet<>(Set.of(sensor1, sensor2));
+        when(securityRepository.getSensors()).thenReturn(sensors);
+
+        securityService.setArmingStatus(ArmingStatus.DISARMED);
+
+        when(imageService.imageContainsCat(any(), anyFloat())).thenReturn(true);
+        BufferedImage catImage = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
+        securityService.processImage(catImage);
+
+        securityService.setArmingStatus(ArmingStatus.ARMED_HOME);
+
+        securityService.processImage(catImage);
+
+        assertEquals(AlarmStatus.ALARM, securityService.getAlarmStatus());
+
+        securityService.changeSensorActivationStatus(sensor1, true);
+        when(imageService.imageContainsCat(any(), anyFloat())).thenReturn(false);
+        BufferedImage noCatImage = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
+        securityService.processImage(noCatImage);
+        assertEquals(AlarmStatus.ALARM, securityService.getAlarmStatus());
+    }
 
 
 }

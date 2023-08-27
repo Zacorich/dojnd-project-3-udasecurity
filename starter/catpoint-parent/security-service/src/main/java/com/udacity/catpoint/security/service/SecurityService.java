@@ -41,13 +41,17 @@ public class SecurityService {
      * @param armingStatus
      */
     public void setArmingStatus(ArmingStatus armingStatus) {
+        //if system is DISARMED activate all sensors
         if (armingStatus == ArmingStatus.DISARMED) {
             setAlarmStatus(AlarmStatus.NO_ALARM);
+            for (Sensor sensor : getSensors()) {
+                changeSensorActivationStatus(sensor, true);
+            }
         }
         this.armingStatus = armingStatus;
         securityRepository.setArmingStatus(armingStatus);
 
-        // if system is DISARMED deactivate all sensors
+        // if system is ARMED inactivate all sensors
         if (armingStatus != ArmingStatus.DISARMED) {
             if(catDetectionStatusWhenDisarmed){
                 setAlarmStatus(AlarmStatus.ALARM);
@@ -56,6 +60,7 @@ public class SecurityService {
                 changeSensorActivationStatus(sensor, false);
             }
         }
+
     }
 
     /**
@@ -148,7 +153,8 @@ public class SecurityService {
             return;
         }
 
-        // If any other sensor (excluding the one being modified) is active, we don't change the status
+        // If any other sensor (excluding the one being modified) is active,
+        // we don't change the status
         boolean anyOtherSensorActive = securityRepository.getSensors().stream()
                 .filter(s -> !s.equals(sensorBeingModified))
                 .anyMatch(Sensor::getActive);
@@ -160,7 +166,7 @@ public class SecurityService {
 
         switch (getAlarmStatus()) {
             case PENDING_ALARM -> setAlarmStatus(AlarmStatus.NO_ALARM);
-            case ALARM -> setAlarmStatus(AlarmStatus.PENDING_ALARM);
+            //case ALARM -> setAlarmStatus(AlarmStatus.PENDING_ALARM);
         }
     }
 
@@ -209,7 +215,7 @@ public class SecurityService {
 
     public Set<Sensor> getSensors() {
         //return new HashSet so I can change sensors and detach them from mocking
-        return securityRepository.getSensors();
+        return new HashSet<>(securityRepository.getSensors());
     }
 
     public void addSensor(Sensor sensor) {
