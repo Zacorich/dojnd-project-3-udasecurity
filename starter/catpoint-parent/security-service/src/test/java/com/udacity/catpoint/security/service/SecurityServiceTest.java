@@ -2,14 +2,11 @@ package com.udacity.catpoint.security.service;
 
 import com.udacity.catpoint.image.service.ImageService;
 import com.udacity.catpoint.security.data.*;
-import com.udacity.catpoint.security.service.SecurityService;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -18,8 +15,9 @@ import java.awt.image.BufferedImage;
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class SecurityServiceTest {
@@ -289,4 +287,102 @@ class SecurityServiceTest {
         // check the system status change to ALARM
         assertEquals(AlarmStatus.ALARM, securityService.getAlarmStatus());
     }
+
+
+    // Further tests for Application Requirements Tip to pass
+
+    /**
+     * Tip 1: Arm the system and activate two sensors; the system should go to the Alarm state.
+     * Then deactivate one sensor, and the system should not change the alarm state.
+     */
+    @Test
+    void tipRequirement_1() {
+        Sensor sensor1 = new Sensor("Sensor A", SensorType.DOOR);
+        Sensor sensor2 = new Sensor("Sensor B", SensorType.WINDOW);
+
+        securityService.setArmingStatus(ArmingStatus.ARMED_HOME);
+
+        securityService.changeSensorActivationStatus(sensor1, true);
+        securityService.changeSensorActivationStatus(sensor2, true);
+
+        assertEquals(AlarmStatus.ALARM, securityService.getAlarmStatus());
+
+        securityService.changeSensorActivationStatus(sensor1, false);
+
+        assertEquals(AlarmStatus.ALARM, securityService.getAlarmStatus());
+    }
+
+    /**
+     * Tip 2: Arm the system, scan a picture until it detects a cat, the system should go to ALARM state,
+     * scan a picture again until there is no cat, the system should go to NO ALARM state.
+     */
+    @Test
+    void tipRequirement_2() {
+        // true for first image and then false for second image
+        when(imageService.imageContainsCat(any(), anyFloat())).thenReturn(true, false);
+
+        securityService.setArmingStatus(ArmingStatus.ARMED_HOME);
+
+        // process image with a cat on it
+        BufferedImage catImage = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
+        securityService.processImage(catImage);
+
+        // check that the system changed to ALARM
+        assertEquals(AlarmStatus.ALARM, securityService.getAlarmStatus());
+
+        // process image without a cat on it
+        BufferedImage noCatImage = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
+        securityService.processImage(noCatImage);
+
+        // check that system change to NO_ALARM state
+        assertEquals(AlarmStatus.NO_ALARM, securityService.getAlarmStatus());
+    }
+
+    /**
+     * Tip 3: Even when a cat is detected in the image, the system should go to the NO ALARM state when deactivated.
+      */
+    @Test
+    void tipRequirement_3() {
+        when(imageService.imageContainsCat(any(), anyFloat())).thenReturn(true);
+
+        securityService.setArmingStatus(ArmingStatus.ARMED_HOME);
+
+        BufferedImage catImage = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
+        securityService.processImage(catImage);
+
+        assertEquals(AlarmStatus.ALARM, securityService.getAlarmStatus());
+
+        securityService.setArmingStatus(ArmingStatus.DISARMED);
+
+        assertEquals(AlarmStatus.NO_ALARM, securityService.getAlarmStatus());
+    }
+
+    /**
+     * Tip 4: Arm the system, scan a picture until it detects a cat, activate a sensor, and scan a picture again until
+     * there is no cat; the system should still be in the alarm state as there is a sensor active.
+     */
+    @Test
+    void tipRequirement_4() {
+        Sensor sensor = new Sensor("Living Room", SensorType.MOTION);
+
+        when(imageService.imageContainsCat(any(), anyFloat())).thenReturn(true);
+
+        securityService.setArmingStatus(ArmingStatus.ARMED_HOME);
+
+        BufferedImage catImage = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
+        securityService.processImage(catImage);
+
+        assertEquals(AlarmStatus.ALARM, securityService.getAlarmStatus());
+
+        securityService.changeSensorActivationStatus(sensor, true);
+
+        when(imageService.imageContainsCat(any(), anyFloat())).thenReturn(false);
+
+        BufferedImage noCatImage = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
+        securityService.processImage(noCatImage);
+
+        assertEquals(AlarmStatus.ALARM, securityService.getAlarmStatus());
+    }
+
+
 }
