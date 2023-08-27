@@ -363,7 +363,14 @@ class SecurityServiceTest {
      */
     @Test
     void tipRequirement_4() {
-        Sensor sensor = new Sensor("Living Room", SensorType.MOTION);
+        Sensor sensor1 = new Sensor("Living Room", SensorType.MOTION);
+        sensor1.setActive(false);
+        Sensor sensor2 = new Sensor("Living Room", SensorType.MOTION);
+        sensor2.setActive(false);
+
+        //mock repository to return sensors needed
+        Set<Sensor> sensors = new HashSet<>(Set.of(sensor1, sensor2));
+        when(securityRepository.getSensors()).thenReturn(sensors);
 
         when(imageService.imageContainsCat(any(), anyFloat())).thenReturn(true);
 
@@ -374,7 +381,7 @@ class SecurityServiceTest {
 
         assertEquals(AlarmStatus.ALARM, securityService.getAlarmStatus());
 
-        securityService.changeSensorActivationStatus(sensor, true);
+        securityService.changeSensorActivationStatus(sensor1, true);
 
         when(imageService.imageContainsCat(any(), anyFloat())).thenReturn(false);
 

@@ -60,8 +60,19 @@ public class SecurityService {
      * @param cat True if a cat is detected, otherwise false.
      */
     private void catDetected(Boolean cat) {
-        if (cat && getArmingStatus() == ArmingStatus.ARMED_HOME) {
-            setAlarmStatus(AlarmStatus.ALARM);
+        if (getArmingStatus() != ArmingStatus.DISARMED) {
+            //if cat is detected keep ALARM status
+            if(cat){
+                setAlarmStatus(AlarmStatus.ALARM);
+                return;
+            }
+            //if any sensor is active keep ALARM status
+            boolean atleastOneSensorIsActive = getSensors().stream().anyMatch(Sensor::getActive);
+            if(atleastOneSensorIsActive){
+                return;
+            }
+            //for any other cases set NO_ALARM status
+            setAlarmStatus(AlarmStatus.NO_ALARM);
         } else {
             setAlarmStatus(AlarmStatus.NO_ALARM);
         }
