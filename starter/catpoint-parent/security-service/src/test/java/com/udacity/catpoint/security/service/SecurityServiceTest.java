@@ -230,4 +230,19 @@ class SecurityServiceTest {
         // check if system changed to no alarm status
         assertEquals(AlarmStatus.NO_ALARM, securityService.getAlarmStatus());
     }
+
+    /**
+     * 9. If the system is disarmed, set the status to no alarm.
+     */
+    @Test
+    void ifSystemIsDisarmed_setStatusToNoAlarm() {
+        // init system
+        securityService.setAlarmStatus(AlarmStatus.ALARM);
+
+        // disarm the system
+        securityService.setArmingStatus(ArmingStatus.DISARMED);
+
+        // check if status changed to NO_ALARM
+        assertEquals(AlarmStatus.NO_ALARM, securityService.getAlarmStatus());
+    }
 }
