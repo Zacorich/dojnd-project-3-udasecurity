@@ -45,8 +45,8 @@ public class SecurityService {
         this.armingStatus = armingStatus;
         securityRepository.setArmingStatus(armingStatus);
 
-        // if set all sensors to inactive state is system is ARMED_HOME
-        if (armingStatus == ArmingStatus.ARMED_HOME || armingStatus == ArmingStatus.ARMED_AWAY) {
+        // if system is DISARMED deactivate all sensors
+        if (armingStatus != ArmingStatus.DISARMED) {
             for (Sensor sensor : getSensors()) {
                 changeSensorActivationStatus(sensor, false);
             }

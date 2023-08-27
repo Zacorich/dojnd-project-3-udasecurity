@@ -15,8 +15,7 @@ import java.awt.image.BufferedImage;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -389,6 +388,31 @@ class SecurityServiceTest {
         securityService.processImage(noCatImage);
 
         assertEquals(AlarmStatus.ALARM, securityService.getAlarmStatus());
+    }
+
+    /**
+     * Tip 5: Sensors were not reset to inactive when the system was armed: put all sensors to the active state
+     * when disarmed, then put the system in the armed state; sensors should be inactivated.
+     */
+    @Test
+    void tipRequirement_5() {
+
+        Sensor sensor1 = new Sensor("Sensor A", SensorType.DOOR);
+        sensor1.setActive(true);
+
+        Sensor sensor2 = new Sensor("Sensor B", SensorType.WINDOW);
+        sensor2.setActive(true);
+
+        Set<Sensor> sensors = Set.of(sensor1, sensor2);
+
+        when(securityRepository.getSensors()).thenReturn(sensors);
+        securityService.setArmingStatus(ArmingStatus.DISARMED);
+
+        assertTrue(securityService.getSensors().stream().allMatch(Sensor::getActive));
+
+        securityService.setArmingStatus(ArmingStatus.ARMED_HOME);
+
+        assertTrue(securityService.getSensors().stream().noneMatch(Sensor::getActive));
     }
 
 
