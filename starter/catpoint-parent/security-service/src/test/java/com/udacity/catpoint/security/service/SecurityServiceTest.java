@@ -245,4 +245,28 @@ class SecurityServiceTest {
         // check if status changed to NO_ALARM
         assertEquals(AlarmStatus.NO_ALARM, securityService.getAlarmStatus());
     }
+
+    /**
+     * 10. If the system is armed, reset all sensors to inactive.
+     */
+    @Test
+    void ifSystemIsArmed_allSensorsShouldBeInactive() {
+        Sensor activeSensor1 = new Sensor("Door", SensorType.DOOR);
+        activeSensor1.setActive(true);
+
+        Sensor activeSensor2 = new Sensor("Motion", SensorType.MOTION);
+        activeSensor2.setActive(true);
+
+        //mock repository to return sensors needed
+        Set<Sensor> sensors = new HashSet<>(Set.of(activeSensor1, activeSensor2));
+        when(securityRepository.getSensors()).thenReturn(sensors);
+
+        // set arming status
+        securityService.setArmingStatus(ArmingStatus.ARMED_HOME);
+
+        // check all sensors to be inactive
+        for (Sensor sensor : securityService.getSensors()) {
+            assertFalse(sensor.getActive());
+        }
+    }
 }

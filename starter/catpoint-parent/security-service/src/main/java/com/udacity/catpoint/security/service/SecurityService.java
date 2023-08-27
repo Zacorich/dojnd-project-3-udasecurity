@@ -44,6 +44,13 @@ public class SecurityService {
         }
         this.armingStatus = armingStatus;
         securityRepository.setArmingStatus(armingStatus);
+
+        // if set all sensors to inactive state is system is ARMED_HOME
+        if (armingStatus == ArmingStatus.ARMED_HOME || armingStatus == ArmingStatus.ARMED_AWAY) {
+            for (Sensor sensor : getSensors()) {
+                changeSensorActivationStatus(sensor, false);
+            }
+        }
     }
 
     /**
@@ -174,6 +181,7 @@ public class SecurityService {
     }
 
     public Set<Sensor> getSensors() {
+        //return new HashSet so I can change sensors and detach them from mocking
         return securityRepository.getSensors();
     }
 
