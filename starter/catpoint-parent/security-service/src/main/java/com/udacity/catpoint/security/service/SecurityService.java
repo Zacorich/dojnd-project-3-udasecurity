@@ -27,6 +27,8 @@ public class SecurityService {
     private AlarmStatus alarmStatus = AlarmStatus.NO_ALARM;
     private ArmingStatus armingStatus = ArmingStatus.DISARMED;
 
+    private boolean catDetectionStatusWhenDisarmed = false;
+
     public SecurityService(SecurityRepository securityRepository, ImageService imageService) {
         this.securityRepository = securityRepository;
         this.imageService = imageService;
@@ -47,6 +49,9 @@ public class SecurityService {
 
         // if system is DISARMED deactivate all sensors
         if (armingStatus != ArmingStatus.DISARMED) {
+            if(catDetectionStatusWhenDisarmed){
+                setAlarmStatus(AlarmStatus.ALARM);
+            }
             for (Sensor sensor : getSensors()) {
                 changeSensorActivationStatus(sensor, false);
             }
@@ -61,6 +66,13 @@ public class SecurityService {
      */
     private void catDetected(Boolean cat) {
         if (getArmingStatus() != ArmingStatus.DISARMED) {
+            //if system is ARMED after detecting a cat while it was DISARMED
+            if(catDetectionStatusWhenDisarmed){
+                setAlarmStatus(AlarmStatus.ALARM);
+                catDetectionStatusWhenDisarmed = false;
+                return;
+            }
+
             //if cat is detected keep ALARM status
             if(cat){
                 setAlarmStatus(AlarmStatus.ALARM);
@@ -74,6 +86,10 @@ public class SecurityService {
             //for any other cases set NO_ALARM status
             setAlarmStatus(AlarmStatus.NO_ALARM);
         } else {
+            //when system is DISARMED
+            if(cat){
+                catDetectionStatusWhenDisarmed = true;
+            }
             setAlarmStatus(AlarmStatus.NO_ALARM);
         }
 

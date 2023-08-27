@@ -415,5 +415,23 @@ class SecurityServiceTest {
         assertTrue(securityService.getSensors().stream().noneMatch(Sensor::getActive));
     }
 
+    /**
+     * Tip 6: Put the system as disarmed, scan a picture until it detects a cat after that,
+     * make it armed, it should make the system in the ALARM state.
+     */
+    @Test
+    void whenSystemIsDisarmedAndCatDetected_thenArmed_shouldTriggerAlarm() {
+        securityService.setArmingStatus(ArmingStatus.DISARMED);
+
+        when(imageService.imageContainsCat(any(), anyFloat())).thenReturn(true);
+        securityService.processImage(new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB));
+
+        securityService.setArmingStatus(ArmingStatus.ARMED_HOME);
+
+        assertEquals(AlarmStatus.ALARM, securityService.getAlarmStatus());
+    }
+
+
+
 
 }
