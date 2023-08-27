@@ -269,4 +269,24 @@ class SecurityServiceTest {
             assertFalse(sensor.getActive());
         }
     }
+
+    /**
+     * 11. If the system is armed-home while the camera shows a cat, set the alarm status to alarm.
+     */
+    @Test
+    void ifSystemIsArmedHomeAndCameraShowsCat_setAlarmStatusToAlarm() {
+        // mock the image service that the image cointains the cat
+        when(imageService.imageContainsCat(any(), anyFloat())).thenReturn(true);
+
+        // set system arming status as required and alarm satus to NO_ALARM
+        securityService.setArmingStatus(ArmingStatus.ARMED_HOME);
+        securityService.setAlarmStatus(AlarmStatus.NO_ALARM);
+
+        // trigger image processing and mockito stub
+        BufferedImage catImage = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
+        securityService.processImage(catImage);
+
+        // check the system status change to ALARM
+        assertEquals(AlarmStatus.ALARM, securityService.getAlarmStatus());
+    }
 }
