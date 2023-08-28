@@ -7,11 +7,13 @@
     <artifactId>catpoint-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
+
   <groupId>com.udacity.catpoint.image</groupId>
   <artifactId>image-service</artifactId>
   <version>1.0-SNAPSHOT</version>
   <name>image-service</name>
   <url>http://maven.apache.org</url>
+
   <properties>
     <auth.version>2.20.134</auth.version>
     <rekognition.version>2.20.134</rekognition.version>

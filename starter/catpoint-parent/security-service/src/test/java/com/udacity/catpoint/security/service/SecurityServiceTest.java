@@ -296,7 +296,7 @@ class SecurityServiceTest {
      * Then deactivate one sensor, and the system should not change the alarm state.
      */
     @Test
-    void tipRequirement_1() {
+    void testAlarmStatusRemainsAfterDeactivatingSingleSensor() {
         Sensor sensor1 = new Sensor("Sensor A", SensorType.DOOR);
         Sensor sensor2 = new Sensor("Sensor B", SensorType.WINDOW);
 
@@ -317,7 +317,7 @@ class SecurityServiceTest {
      * scan a picture again until there is no cat, the system should go to NO ALARM state.
      */
     @Test
-    void tipRequirement_2() {
+    void testAlarmStatusTogglesOnCatPresence() {
         // true for first image and then false for second image
         when(imageService.imageContainsCat(any(), anyFloat())).thenReturn(true, false);
 
@@ -342,7 +342,7 @@ class SecurityServiceTest {
      * Tip 3: Even when a cat is detected in the image, the system should go to the NO ALARM state when deactivated.
       */
     @Test
-    void tipRequirement_3() {
+    void testSystemDeactivationResetsAlarmEvenAfterCatDetection() {
         when(imageService.imageContainsCat(any(), anyFloat())).thenReturn(true);
 
         securityService.setArmingStatus(ArmingStatus.ARMED_HOME);
@@ -362,7 +362,7 @@ class SecurityServiceTest {
      * there is no cat; the system should still be in the alarm state as there is a sensor active.
      */
     @Test
-    void tipRequirement_4() {
+    void testSensorActivationKeepsAlarmOnWithoutCatDetection() {
         Sensor sensor1 = new Sensor("Living Room", SensorType.MOTION);
         sensor1.setActive(false);
         Sensor sensor2 = new Sensor("Living Room", SensorType.MOTION);
@@ -396,7 +396,7 @@ class SecurityServiceTest {
      * when disarmed, then put the system in the armed state; sensors should be inactivated.
      */
     @Test
-    void tipRequirement_5() {
+    void testSensorsResetToInactiveWhenSystemIsArmed() {
 
         Sensor sensor1 = new Sensor("Sensor A", SensorType.DOOR);
         sensor1.setActive(true);
@@ -432,11 +432,8 @@ class SecurityServiceTest {
         assertEquals(AlarmStatus.ALARM, securityService.getAlarmStatus());
     }
 
-    /**
-     * Test 1: for better coverage
-     */
     @Test
-    void betterCoverage1() {
+    void testAlarmStatusWithCatImageAndSensorActivationChanges() {
         Sensor sensor1 = new Sensor("Living Room", SensorType.MOTION);
         sensor1.setActive(false);
         Sensor sensor2 = new Sensor("Living Room", SensorType.MOTION);
