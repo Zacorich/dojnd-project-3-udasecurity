@@ -76,17 +76,20 @@ public class SecurityService {
             if(catDetectionStatusWhenDisarmed){
                 setAlarmStatus(AlarmStatus.ALARM);
                 catDetectionStatusWhenDisarmed = false;
+                statusListeners.forEach(sl -> sl.catDetected(cat));
                 return;
             }
 
             //if cat is detected keep ALARM status
             if(cat){
                 setAlarmStatus(AlarmStatus.ALARM);
+                statusListeners.forEach(sl -> sl.catDetected(cat));
                 return;
             }
             //if any sensor is active keep ALARM status
             boolean atleastOneSensorIsActive = getSensors().stream().anyMatch(Sensor::getActive);
             if(atleastOneSensorIsActive){
+                statusListeners.forEach(sl -> sl.catDetected(cat));
                 return;
             }
             //for any other cases set NO_ALARM status
@@ -167,7 +170,7 @@ public class SecurityService {
 
         switch (getAlarmStatus()) {
             case PENDING_ALARM -> setAlarmStatus(AlarmStatus.NO_ALARM);
-            //case ALARM -> setAlarmStatus(AlarmStatus.PENDING_ALARM);
+            case ALARM -> setAlarmStatus(AlarmStatus.PENDING_ALARM);
         }
     }
 
