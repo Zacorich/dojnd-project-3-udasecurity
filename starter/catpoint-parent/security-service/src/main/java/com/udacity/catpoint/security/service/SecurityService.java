@@ -60,6 +60,7 @@ public class SecurityService {
                 changeSensorActivationStatus(sensor, false);
             }
         }
+        statusListeners.forEach(sl -> sl.sensorStatusChanged());
 
     }
 
@@ -192,6 +193,8 @@ public class SecurityService {
         }
         sensor.setActive(active);
         securityRepository.updateSensor(sensor);
+
+
     }
 
     /**

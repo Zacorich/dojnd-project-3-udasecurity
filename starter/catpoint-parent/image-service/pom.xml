@@ -31,5 +31,18 @@
       <artifactId>rekognition</artifactId>
       <version>${rekognition.version}</version>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/software.amazon.awssdk/core -->
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>core</artifactId>
+      <version>2.20.134</version>
+      <type>pom</type>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/software.amazon.awssdk/regions -->
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>regions</artifactId>
+      <version>2.20.134</version>
+    </dependency>
   </dependencies>
 </project>
