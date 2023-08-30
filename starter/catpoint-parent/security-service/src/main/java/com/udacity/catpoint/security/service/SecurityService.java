@@ -41,15 +41,17 @@ public class SecurityService {
      * @param armingStatus
      */
     public void setArmingStatus(ArmingStatus armingStatus) {
+        this.armingStatus = armingStatus;
+        securityRepository.setArmingStatus(armingStatus);
+
         //if system is DISARMED activate all sensors
         if (armingStatus == ArmingStatus.DISARMED) {
             setAlarmStatus(AlarmStatus.NO_ALARM);
-            for (Sensor sensor : getSensors()) {
-                changeSensorActivationStatus(sensor, true);
-            }
+//            for (Sensor sensor : getSensors()) {
+//                changeSensorActivationStatus(sensor, true);
+//            }
         }
-        this.armingStatus = armingStatus;
-        securityRepository.setArmingStatus(armingStatus);
+
 
         // if system is ARMED inactivate all sensors
         if (armingStatus != ArmingStatus.DISARMED) {
