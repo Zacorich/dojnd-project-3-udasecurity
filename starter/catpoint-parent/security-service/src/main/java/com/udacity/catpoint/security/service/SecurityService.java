@@ -47,9 +47,6 @@ public class SecurityService {
         //if system is DISARMED activate all sensors
         if (armingStatus == ArmingStatus.DISARMED) {
             setAlarmStatus(AlarmStatus.NO_ALARM);
-//            for (Sensor sensor : getSensors()) {
-//                changeSensorActivationStatus(sensor, true);
-//            }
         }
 
 
